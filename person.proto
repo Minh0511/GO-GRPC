@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "./";
+package person;
+
+message Person {
+  string name = 1;
+  int32 age = 2;
+  bool has_car = 3;
+}
+
+service PersonService {
+  rpc SayHello(HelloRequest) returns (HelloResponse) {}
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  string message = 1;
+}

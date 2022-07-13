@@ -1,25 +1,41 @@
 package main
 
 import (
-	"GO-GRPC/person"
+	gw "GO-GRPC/person"
+	"context"
+	"flag"
 	"fmt"
+	"github.com/golang/glog"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
-	"log"
-	"net"
+	"google.golang.org/grpc/credentials/insecure"
+	"net/http"
 )
 
-func main() {
-	fmt.Println("Go gRPC Beginners Tutorial Person!")
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 8000))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
+var (
+	grpcServerEndpoint = flag.String("grpc-server-endpoint", "localhost:9090", "gRPC server endpoint")
+)
 
-	s := person.Server{}
-	grpcServer := grpc.NewServer()
-	person.RegisterPersonServiceServer(grpcServer, &s)
-	err = grpcServer.Serve(lis)
+//the function run starts the gRPC server and registers the gRPC gateway
+func run() error {
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	mux := runtime.NewServeMux()
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	err := gw.RegisterPersonServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts)
 	if err != nil {
-		log.Fatalf("failed to serve: %s", err)
+		return err
+	}
+	return http.ListenAndServe(":8081", mux)
+}
+func main() {
+	fmt.Println("Go gRPC!")
+	flag.Parse()
+	defer glog.Flush()
+
+	if err := run(); err != nil {
+		glog.Fatal(err)
 	}
 }

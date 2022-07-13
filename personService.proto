@@ -14,8 +14,8 @@ message Person {
 service PersonService {
   rpc SayHello(HelloRequest) returns (HelloResponse) {
     option (google.api.http) = {
-      get: "/v1/person/{name=*}"
-      body: "HelloRequest"
+      post: "/v1/say-hello"
+      body: "*"
     };
   }
 }

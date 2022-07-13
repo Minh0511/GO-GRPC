@@ -3,6 +3,8 @@ syntax = "proto3";
 option go_package = "./";
 package person;
 
+import "google/api/annotations.proto";
+
 message Person {
   string name = 1;
   int32 age = 2;
@@ -10,7 +12,12 @@ message Person {
 }
 
 service PersonService {
-  rpc SayHello(HelloRequest) returns (HelloResponse) {}
+  rpc SayHello(HelloRequest) returns (HelloResponse) {
+    option (google.api.http) = {
+      get: "/v1/person/{name=*}"
+      body: "HelloRequest"
+    };
+  }
 }
 
 message HelloRequest {
